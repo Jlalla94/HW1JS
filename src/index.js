@@ -2,10 +2,27 @@ import $ from "jquery";
 
 let activeItemsValue = 0;
 
-function ToDoItem({ text: text, id: id = " ", status: status = "" }) {
+let data = {};
+
+if (localStorage.getItem("toDoItem")) {
+  data = JSON.parse(localStorage.toDoItem);
+  console.log(localStorage);
+  localStorage.clear();
+  $.each(data, (index, item) => new ToDoItem(item));
+}
+
+function ToDoItem({ text: text, id: id = Date.now(), status: status = "" }) {
   status === ""
     ? activeItemsValue++
     : $(".clear-completed").css("display", "block");
+
+  data[id] = {
+    text: text,
+    id: id,
+    status: status
+  };
+
+  localStorage.toDoItem = JSON.stringify(data);
 
   let viewItem = $(`
   <li class="${status}">
@@ -23,7 +40,17 @@ function ToDoItem({ text: text, id: id = " ", status: status = "" }) {
         .find("strong")
         .text(--activeItemsValue);
       $(".clear-completed").css("display", "block");
+      data[id] = {
+        text: text,
+        id: id,
+        status: "completed"
+      };
     } else {
+      data[id] = {
+        text: text,
+        id: id,
+        status: ""
+      };
       viewItem.removeClass("completed");
       $("#toggle-all").prop("checked", false);
       $(".todo-count")
@@ -33,6 +60,7 @@ function ToDoItem({ text: text, id: id = " ", status: status = "" }) {
         $(".clear-completed").css("display", "none");
       }
     }
+    localStorage.toDoItem = JSON.stringify(data);
   });
 
   viewItem.find(".destroy").on("click", function() {
@@ -47,6 +75,8 @@ function ToDoItem({ text: text, id: id = " ", status: status = "" }) {
         $(".clear-completed").css("display", "none");
       }
     }
+    delete data[id];
+    localStorage.toDoItem = JSON.stringify(data);
   });
 
   $('ul[class="todo-list"]').append(viewItem);

@@ -3,7 +3,10 @@ import $ from "jquery";
 let activeItemsValue = 0;
 
 function ToDoItem({ text: text, id: id = " ", status: status = "" }) {
-  activeItemsValue = status !== "" ? activeItemsValue : activeItemsValue++;
+  status === ""
+    ? activeItemsValue++
+    : $(".clear-completed").css("display", "block");
+
   let viewItem = $(`
   <li class="${status}">
     <div class="view">
@@ -18,16 +21,38 @@ function ToDoItem({ text: text, id: id = " ", status: status = "" }) {
       viewItem.addClass("completed");
       $(".todo-count")
         .find("strong")
-        .text(activeItemsValue--);
+        .text(--activeItemsValue);
+      $(".clear-completed").css("display", "block");
     } else {
       viewItem.removeClass("completed");
       $("#toggle-all").prop("checked", false);
       $(".todo-count")
         .find("strong")
-        .text(activeItemsValue++);
+        .text(++activeItemsValue);
+      if ($('ul[class="todo-list"]').children(".completed").length === 0) {
+        $(".clear-completed").css("display", "none");
+      }
     }
   });
+
+  viewItem.find(".destroy").on("click", function() {
+    if (!viewItem.find(".toggle").is(":checked")) {
+      $(".todo-count")
+        .find("strong")
+        .text(--activeItemsValue);
+      viewItem.remove();
+    } else {
+      viewItem.remove();
+      if ($('ul[class="todo-list"]').children(".completed").length === 0) {
+        $(".clear-completed").css("display", "none");
+      }
+    }
+  });
+
   $('ul[class="todo-list"]').append(viewItem);
+  $(".todo-count")
+    .find("strong")
+    .text(activeItemsValue);
 }
 
 $(".new-todo")
@@ -78,3 +103,13 @@ $("#toggle-all").on("change", function(event) {
       );
   }
 });
+
+$(".clear-completed").on("click", () =>
+  $('ul[class="todo-list"]')
+    .children(".completed")
+    .each((index, item) =>
+      $(item)
+        .find(".destroy")
+        .click()
+    )
+);

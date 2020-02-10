@@ -6,7 +6,6 @@ let data = {};
 
 if (localStorage.getItem("toDoItem")) {
   data = JSON.parse(localStorage.toDoItem);
-  console.log(localStorage);
   localStorage.clear();
   $.each(data, (index, item) => new ToDoItem(item));
 }
@@ -33,13 +32,17 @@ function ToDoItem({ text: text, id: id = Date.now(), status: status = "" }) {
     </div>
   </li>`);
 
+  $('ul[class="todo-list"]').append(viewItem);
+
   viewItem.find(".toggle").on("change", function(event) {
     if ($(event.target).is(":checked")) {
       viewItem.addClass("completed");
       $(".todo-count")
         .find("strong")
         .text(--activeItemsValue);
-      $(".clear-completed").css("display", "block");
+      if (Object.keys(data).length !== activeItemsValue) {
+        $(".clear-completed").css("display", "block");
+      }
       data[id] = {
         text: text,
         id: id,
@@ -56,7 +59,7 @@ function ToDoItem({ text: text, id: id = Date.now(), status: status = "" }) {
       $(".todo-count")
         .find("strong")
         .text(++activeItemsValue);
-      if ($('ul[class="todo-list"]').children(".completed").length === 0) {
+      if (Object.keys(data).length === activeItemsValue) {
         $(".clear-completed").css("display", "none");
       }
     }
@@ -71,7 +74,7 @@ function ToDoItem({ text: text, id: id = Date.now(), status: status = "" }) {
       viewItem.remove();
     } else {
       viewItem.remove();
-      if ($('ul[class="todo-list"]').children(".completed").length === 0) {
+      if (Object.keys(data).length === activeItemsValue) {
         $(".clear-completed").css("display", "none");
       }
     }
@@ -79,7 +82,6 @@ function ToDoItem({ text: text, id: id = Date.now(), status: status = "" }) {
     localStorage.toDoItem = JSON.stringify(data);
   });
 
-  $('ul[class="todo-list"]').append(viewItem);
   $(".todo-count")
     .find("strong")
     .text(activeItemsValue);
@@ -143,3 +145,5 @@ $(".clear-completed").on("click", () =>
         .click()
     )
 );
+
+console.log(window.location.hash);
